@@ -60,6 +60,7 @@ type PropsType = ViewPropTypes & {
   onFacesDetected?: ({ faces: Array<TrackedFaceFeature> }) => void,
   captureAudio?: boolean,
   useCamera2Api?: boolean,
+  skipPermissionCheck?: boolean,
 };
 
 const CameraManager: Object = NativeModules.RNCameraManager ||
@@ -136,6 +137,7 @@ export default class Camera extends React.Component<PropsType> {
     pendingAuthorizationView: PropTypes.element,
     captureAudio: PropTypes.bool,
     useCamera2Api: PropTypes.bool,
+    skipPermissionCheck: PropTypes.bool,
   };
 
   static defaultProps: Object = {
@@ -183,6 +185,7 @@ export default class Camera extends React.Component<PropsType> {
     ),
     captureAudio: false,
     useCamera2Api: false,
+    skipPermissionCheck: false,
   };
 
   _cameraRef: ?Object;
@@ -273,6 +276,9 @@ export default class Camera extends React.Component<PropsType> {
   };
 
   async componentWillMount() {
+    if (this.props.skipPermissionCheck) {
+      return this.setState({ isAuthorized: true, isAuthorizationChecked: true });
+    }
     const hasVideoAndAudio = this.props.captureAudio;
     const isAuthorized = await requestPermissions(
       hasVideoAndAudio,
